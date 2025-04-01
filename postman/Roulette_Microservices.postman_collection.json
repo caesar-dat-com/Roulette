@@ -1,0 +1,519 @@
+{
+    "info": {
+      "_postman_id": "a9b1f8fc-1234-4d3b-9f8e-abcdef123456",
+      "name": "Roulette Microservices",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Users",
+        "item": [
+          {
+            "name": "Create User",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@mail.com\",\n  \"alias\": \"JohnTheGambler\",\n  \"password\": \"12345\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3001/users",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3001",
+                "path": [
+                  "users"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get User by ID",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3001/users/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3001",
+                "path": [
+                  "users",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update User",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"john.new@mail.com\",\n  \"balance\": 150\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3001/users/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3001",
+                "path": [
+                  "users",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Validate User",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3001/users/validate?alias=JohnTheGambler&password=12345",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3001",
+                "path": [
+                  "users",
+                  "validate"
+                ],
+                "query": [
+                  {
+                    "key": "alias",
+                    "value": "JohnTheGambler"
+                  },
+                  {
+                    "key": "password",
+                    "value": "12345"
+                  }
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Roulette",
+        "item": [
+          {
+            "name": "Start Roulette Game",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"userId\": 1,\n  \"betAmount\": 50\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3002/roulette",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3002",
+                "path": [
+                  "roulette"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Roulette Game",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3002/roulette/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3002",
+                "path": [
+                  "roulette",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Bonuses",
+        "item": [
+          {
+            "name": "Create Bonus",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"type\": \"DoubleWin\",\n  \"description\": \"Doubles your next win\",\n  \"effect\": \"x2\",\n  \"conditions\": \"User must have played at least 3 times today\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3003/bonuses",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3003",
+                "path": [
+                  "bonuses"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Bonuses",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3003/bonuses",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3003",
+                "path": [
+                  "bonuses"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Bonus by ID",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3003/bonuses/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3003",
+                "path": [
+                  "bonuses",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update Bonus",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"description\": \"Updated bonus description\"\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3003/bonuses/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3003",
+                "path": [
+                  "bonuses",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Transactions",
+        "item": [
+          {
+            "name": "Create Transaction",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"userId\": 1,\n  \"amount\": 50,\n  \"type\": \"bet\",\n  \"rouletteId\": 1\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3004/transactions",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3004",
+                "path": [
+                  "transactions"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Transaction by ID",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3004/transactions/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3004",
+                "path": [
+                  "transactions",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Transactions for User",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3004/transactions?userId=1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3004",
+                "path": [
+                  "transactions"
+                ],
+                "query": [
+                  {
+                    "key": "userId",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Statistics",
+        "item": [
+          {
+            "name": "Global Statistics",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3005/statistics",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3005",
+                "path": [
+                  "statistics"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "User Statistics",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3005/statistics/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3005",
+                "path": [
+                  "statistics",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Games Statistics",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3005/statistics/games",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3005",
+                "path": [
+                  "statistics",
+                  "games"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Events",
+        "item": [
+          {
+            "name": "List Events",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3006/events",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3006",
+                "path": [
+                  "events"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create Event",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Double Hour\",\n  \"description\": \"All wins are doubled between 10:00 and 11:00\",\n  \"startTime\": \"2025-04-01T10:00:00Z\",\n  \"endTime\": \"2025-04-01T11:00:00Z\",\n  \"active\": true\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3006/events",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3006",
+                "path": [
+                  "events"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update Event",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"active\": false\n}"
+              },
+              "url": {
+                "raw": "http://localhost:3006/events/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3006",
+                "path": [
+                  "events",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Event",
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "http://localhost:3006/events/1",
+                "protocol": "http",
+                "host": [
+                  "localhost"
+                ],
+                "port": "3006",
+                "path": [
+                  "events",
+                  "1"
+                ]
+              }
+            },
+            "response": []
+          }
+        ]
+      }
+    ]
+  }
+  
