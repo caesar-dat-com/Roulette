@@ -167,10 +167,11 @@ Consultar estadísticas globales	Estadísticas	GET /estadisticas
 
 ## 📂 Estructura del Proyecto
 
-La estructura del repositorio se organiza en carpetas separadas para cada microservicio dentro de la carpeta `Services`:
+La estructura del repositorio se organiza en carpetas separadas para cada microservicio dentro de la carpeta `Services`, y la base de datos de cada microservicio se encuentra en la carpeta `BD postgres`
 
 ```
 Roulette/
+│
 ├── Services/
 │   ├── bonuses/
 │   │   ├── index.js
@@ -190,32 +191,57 @@ Roulette/
 │   └── users/
 │       ├── index.js
 │       └── package.json
+│
+├── BD postgres/
+│   ├── BDonificaciones.sql
+│   ├── BDestadisticas.sql
+│   ├── BDeventos.sql
+│   ├── BDroulette.sql
+│   └── BDusers.sql
+│
 ├── README.md
 └── Roulette_Microservices.postman_collection.json
-```
 
 Cada carpeta contiene su propio código y dependencias (usando Node.js + Express). Además, se incluye una colección de Postman para facilitar las pruebas de cada endpoint. 📋
 
 ---
 
-## 🚀 Cómo Poner en Marcha el Proyecto
-
-### Requisitos Previos
-
-- [Node.js](https://nodejs.org/) instalado. 💻
-- Git (opcional) para clonar el repositorio. 🐙
-- [Postman](https://www.postman.com/downloads/) para probar las APIs. 📲
+🚀 Cómo Poner en Marcha el Proyecto
+🧰 Requisitos Previos
+Node.js instalado 💻
+PostgreSQL instalado y corriendo (recomendado v13+) 🐘
+pgAdmin (opcional, para cargar las bases de datos de forma visual)
+Git para clonar el repositorio 🐙
+Postman para probar las APIs 📲
 
 ### Pasos de Instalación y Ejecución
 
 1. **Clonar el Repositorio:**
 
    ```bash
-   git clone https://github.com/tu_usuario/tu_repositorio.git
-   cd tu_repositorio
+   git clone https://github.com/caesar-dat-com/Roulette.git
    ```
 
-2. **Instalar Dependencias en Cada Microservicio:**
+2. **Desde cada base, abre la opción "Query Tool" y ejecuta el archivo .sql correspondiente, que se encuentra en la carpeta BD postgres/.**
+
+- Opción B - vía terminal de PostgreSQL:
+
+psql -U postgres -d Users -f "BD postgres/BDusers.sql"
+psql -U postgres -d Roulette -f "BD postgres/BDroulette.sql"
+psql -U postgres -d Bonificaciones -f "BD postgres/BDbonificaciones.sql"
+psql -U postgres -d Estadisticas -f "BD postgres/BDestadisticas.sql"
+psql -U postgres -d Eventos -f "BD postgres/BDeventos.sql"
+
+3. Configurar la Conexión a la Base de Datos
+Dentro de cada carpeta de microservicio, cree un archivo .env con su configuración PostgreSQL:
+
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER=postgres
+PG_PASSWORD=tu_contraseña
+PG_DATABASE=NombreBaseDeDatosCorrespondiente
+
+4. **Instalar Dependencias en Cada Microservicio:**
 
    Por cada carpeta de microservicio (por ejemplo, `Services/users`):
 
@@ -226,7 +252,7 @@ Cada carpeta contiene su propio código y dependencias (usando Node.js + Express
 
    Repite el proceso para: `roulette`, `bonuses`, `transactions`, `statistics` y `events`.
 
-3. **Ejecutar Cada Microservicio:**
+5. **Ejecutar Cada Microservicio:**
 
    Abre una terminal separada para cada servicio y ejecuta:
 
@@ -239,13 +265,13 @@ Cada carpeta contiene su propio código y dependencias (usando Node.js + Express
    - **"Roulette microservice running on port 3002"**
    - **"Transactions microservice running on port 3004"**, etc. ✅
 
-4. **Importar la Colección de Postman:**
+6. **Importar la Colección de Postman:**
 
    - Abre Postman.
    - Haz clic en **"Import"** y selecciona el archivo `Roulette_Microservices.postman_collection.json`.
    - Verifica que aparezcan las carpetas correspondientes a cada microservicio (Users, Roulette, Bonuses, Transactions, Statistics, Events).
 
-5. **Probar los Endpoints:**
+7. **Probar los Endpoints:**
 
    - Selecciona cada solicitud en Postman y haz clic en **"Send"** para probar los endpoints.  
    - Por ejemplo, para **crear un usuario**, usa la solicitud "Create User" con el Body adecuado y revisa la respuesta.
