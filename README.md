@@ -241,6 +241,24 @@ Roulette/
 └── README.md                         ← Este archivo de documentación
 ```
 
+**diagrama de comunicacion entre microservicios**
+
+Estadísticas
+├── Consulta a Roulette → Historial de partidas
+├── Consulta a Users → Datos del jugador
+├── Consulta a Bonificaciones → Uso de bonos
+└── Consulta a Eventos → Participación en eventos
+
+Roulette
+├── Verifica en Users → Identidad del jugador
+└── Consulta en Bonificaciones → Bonificación activa
+
+Eventos
+└── Consulta en Users → Confirmar usuario participante
+
+Bonificaciones
+└── Asigna a Users → Registro de bonificaciones otorgadas
+
 ---
 
 ## 🚀 Cómo Poner en Marcha el Proyecto
@@ -346,6 +364,7 @@ El frontend se encuentra en la carpeta `Roulette/roulette-frontend`.
 ### 7. Probar los Endpoints
 
 Utilice Postman para enviar peticiones a cada microservicio y verificar que las respuestas sean las esperadas. Por ejemplo, para crear un usuario, utilice la solicitud `POST /usuarios` con el cuerpo adecuado.
+
 
 ---
 
