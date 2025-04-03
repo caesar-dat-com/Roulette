@@ -204,6 +204,24 @@ Roulette/
 
 Cada carpeta contiene su propio código y dependencias (usando Node.js + Express). Además, se incluye una colección de Postman para facilitar las pruebas de cada endpoint. 📋
 
+**diagrama de comunicacion entre microservicios**
+
+Estadísticas
+├── Consulta a Roulette → Historial de partidas
+├── Consulta a Users → Datos del jugador
+├── Consulta a Bonificaciones → Uso de bonos
+└── Consulta a Eventos → Participación en eventos
+
+Roulette
+├── Verifica en Users → Identidad del jugador
+└── Consulta en Bonificaciones → Bonificación activa
+
+Eventos
+└── Consulta en Users → Confirmar usuario participante
+
+Bonificaciones
+└── Asigna a Users → Registro de bonificaciones otorgadas
+
 ---
 
 🚀 Cómo Poner en Marcha el Proyecto
@@ -276,6 +294,7 @@ PG_DATABASE=NombreBaseDeDatosCorrespondiente
    - Selecciona cada solicitud en Postman y haz clic en **"Send"** para probar los endpoints.  
    - Por ejemplo, para **crear un usuario**, usa la solicitud "Create User" con el Body adecuado y revisa la respuesta.
    - Repite el proceso para todos los microservicios.
+
 
 ---
 
