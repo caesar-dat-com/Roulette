@@ -9,29 +9,41 @@ La idea es simular un entorno de juego donde los usuarios pueden apostar, jugar 
 
 ## 🎯 Objetivo del Proyecto
 
-- **Microservicios independientes:** Cada servicio maneja una responsabilidad específica (usuarios, ruleta, bonificaciones, transacciones, estadísticas y eventos).  
-- **API REST:** Los microservicios se comunican a través de endpoints REST, permitiendo la integración con clientes como Postman o una interfaz web.  
-- **Entorno de casino virtual:** Permite registrar usuarios, realizar apuestas en la ruleta y ver resultados, bonificaciones y estadísticas.  
-- **Preparación para el futuro:** Base sólida para integrar un API Gateway, bases de datos, autenticación avanzada, y mucho más. 💪
+- **Microservicios independientes:**  
+  Cada servicio maneja una responsabilidad específica (usuarios, ruleta, bonificaciones, transacciones, estadísticas y eventos).  
+- **API REST:**  
+  Los microservicios se comunican a través de endpoints REST, permitiendo la integración con clientes como Postman o una interfaz web.  
+- **Entorno de casino virtual:**  
+  Permite registrar usuarios, realizar apuestas en la ruleta y ver resultados, bonificaciones y estadísticas.  
+- **Preparación para el futuro:**  
+  Base sólida para integrar un API Gateway, bases de datos, autenticación avanzada, y mucho más. 💪
 
 ---
+
 ## 🧠 Identificación del Problema
 
-Actualmente, muchas plataformas de simulación de apuestas carecen de estructuras modulares que permitan escalar funcionalidades, medir resultados estadísticos en tiempo real o personalizar eventos y recompensas. Esta ausencia de flexibilidad limita la capacidad de adaptación a nuevos juegos, reglas o segmentos de usuarios.
+Muchas plataformas de simulación de apuestas carecen de estructuras modulares que permitan:
+- Escalar funcionalidades.
+- Medir resultados estadísticos en tiempo real.
+- Personalizar eventos y recompensas.
 
-### 🧩 Necesidades detectadas:
+Esta ausencia de flexibilidad limita la capacidad de adaptación a nuevos juegos, reglas o segmentos de usuarios.
+
+### 🧩 Necesidades Detectadas
+
 - Simular un entorno de apuestas seguro y sin dinero real.
 - Gestionar distintos tipos de usuarios con roles específicos.
 - Visualizar estadísticas del sistema para análisis de resultados.
 - Aplicar bonificaciones y eventos promocionales programables.
 - Contar con una arquitectura mantenible, escalable y desacoplada.
 
+---
 
 ## 🛠️ Características Actuales
 
 ### 👤 Users (Puerto 3001)
 - **Funcionalidad:**  
-  - Creación, consulta, actualización y validación de usuarios.
+  Creación, consulta, actualización y validación de usuarios.
 - **Datos manejados:**  
   ```json
   {
@@ -46,7 +58,7 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
 
 ### 🎡 Roulette (Puerto 3002)
 - **Funcionalidad:**  
-  - Inicia partidas de ruleta, ejecuta giros y genera resultados aleatorios (0 a 36).  
+  Inicia partidas de ruleta, ejecuta giros y genera resultados aleatorios (0 a 36).  
 - **Datos manejados:**  
   ```json
   {
@@ -60,7 +72,7 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
 
 ### 🎁 Bonuses (Puerto 3003)
 - **Funcionalidad:**  
-  - Gestión de bonificaciones como giros gratis o multiplicadores.
+  Gestión de bonificaciones como giros gratis o multiplicadores.
 - **Datos manejados:**  
   ```json
   {
@@ -74,7 +86,7 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
 
 ### 💰 Transactions (Puerto 3004)
 - **Funcionalidad:**  
-  - Registra transacciones de apuestas y ganancias, asociadas a usuarios y partidas.
+  Registra transacciones de apuestas y ganancias, asociadas a usuarios y partidas.
 - **Datos manejados:**  
   ```json
   {
@@ -89,7 +101,7 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
 
 ### 📊 Statistics (Puerto 3005)
 - **Funcionalidad:**  
-  - Ofrece datos estadísticos globales y por usuario (número de partidas, dinero apostado, etc.).
+  Ofrece datos estadísticos globales y por usuario (número de partidas, dinero apostado, etc.).
 - **Datos manejados:**  
   ```json
   {
@@ -102,7 +114,7 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
 
 ### 🎉 Events (Puerto 3006)
 - **Funcionalidad:**  
-  - Gestiona eventos especiales, como "Double Hour" (donde las ganancias se duplican).
+  Gestiona eventos especiales, como "Double Hour" (donde las ganancias se duplican).
 - **Datos manejados:**  
   ```json
   {
@@ -115,180 +127,252 @@ Actualmente, muchas plataformas de simulación de apuestas carecen de estructura
   }
   ```
 
+---
 
-👥 Comportamiento del Sistema por Tipo de Usuario
-El sistema está diseñado para dos tipos de usuarios: Jugador y Administrador.
-Cada uno interactúa con la aplicación de manera diferente, utilizando los microservicios según sus permisos y necesidades.
+## 👥 Comportamiento del Sistema por Tipo de Usuario
 
-🧑‍🎲 Usuario: Jugador
-Este es el usuario común que interactúa con la aplicación para divertirse, participar en rondas de ruleta y aprovechar bonificaciones.
+### 🧑‍🎲 Usuario: Jugador
+- **Historias de usuario:**
+  - "Como jugador, quiero registrarme para poder acceder a la ruleta virtual y recibir bonificaciones."
+  - "Como jugador, quiero jugar una partida de ruleta para obtener recompensas."
+  - "Como jugador, quiero ver mis estadísticas de juego para saber cuántas veces he ganado."
+- **Acciones posibles:**
+  - **Registrarse:** Users → `POST /usuarios`
+  - **Consultar datos propios:** Users → `GET /usuarios/:id`
+  - **Apostar en la ruleta:** Roulette → `POST /apostar`
+  - **Ver resultados:** Roulette → `GET /resultados`
+  - **Reclamar bonificaciones:** Bonuses → `GET /bonificaciones/:id`
+  - **Ver eventos actuales:** Events → `GET /eventos`
+  - **Ver estadísticas globales:** Statistics → `GET /estadisticas`
 
-🧩 Historias de usuario (Jugador):
-“Como jugador, quiero registrarme para poder acceder a la ruleta virtual y recibir bonificaciones.”
+### 🛡️ Usuario: Administrador
+- **Historias de usuario:**
+  - "Como administrador, quiero ver todos los usuarios registrados para hacer seguimiento de su actividad."
+  - "Como administrador, quiero crear eventos promocionales para atraer más jugadores."
+  - "Como administrador, quiero consultar estadísticas generales para analizar tendencias."
+- **Acciones posibles:**
+  - **Ver todos los usuarios:** Users → `GET /usuarios`
+  - **Crear/editar eventos:** Events → `POST /eventos`
+  - **Crear/editar bonificaciones:** Bonuses → `POST /bonificaciones`
+  - **Consultar estadísticas globales:** Statistics → `GET /estadisticas`
 
-“Como jugador, quiero jugar una partida de ruleta para obtener recompensas.”
-
-“Como jugador, quiero ver mis estadísticas de juego para saber cuántas veces he ganado.”
-
-🧪 Acciones posibles:
-Acción	Microservicio	Endpoint sugerido
-Registrarse	Users	POST /usuarios
-Consultar datos propios	Users	GET /usuarios/:id
-Apostar en la ruleta	Roulette	POST /apostar
-Ver resultados	Roulette	GET /resultados
-Reclamar bonificaciones	Bonificaciones	GET /bonificaciones/:id
-Ver eventos actuales	Eventos	GET /eventos
-Ver estadísticas globales	Estadísticas	GET /estadisticas
-🛡️ Usuario: Administrador
-El administrador es responsable de la gestión del sistema, visualización completa de resultados, creación de eventos y supervisión de usuarios.
-
-🧩 Historias de usuario (Admin):
-“Como administrador, quiero ver todos los usuarios registrados para hacer seguimiento de su actividad.”
-
-“Como administrador, quiero crear eventos promocionales para atraer más jugadores.”
-
-“Como administrador, quiero consultar estadísticas generales para analizar tendencias.”
-
-🧪 Acciones posibles:
-Acción	Microservicio	Endpoint sugerido
-Ver todos los usuarios	Users	GET /usuarios
-Crear/editar eventos	Eventos	POST /eventos
-Crear/editar bonificaciones	Bonificaciones	POST /bonificaciones
-Consultar estadísticas globales	Estadísticas	GET /estadisticas
-🔁 Flujo básico (Jugador)
-🔐 Se registra desde el microservicio Users.
-
-🎲 Realiza apuestas llamando a Roulette.
-
-🎁 Reclama recompensas en Bonificaciones.
-
-📊 Consulta sus avances en Estadísticas.
 ---
 
 ## 📂 Estructura del Proyecto
 
-La estructura del repositorio se organiza en carpetas separadas para cada microservicio dentro de la carpeta `Services`, y la base de datos de cada microservicio se encuentra en la carpeta `BD postgres`
+El repositorio está organizado de la siguiente manera:
 
 ```
 Roulette/
 │
-├── Services/
+├── Services/                         ← Microservicios Backend (Node.js)
 │   ├── bonuses/
-│   │   ├── index.js
-│   │   └── package.json
+│   │   ├── index.js                  (Puerto 3003)
+│   │   ├── package.json
+│   │   └── package-lock.json
 │   ├── events/
-│   │   ├── index.js
-│   │   └── package.json
+│   │   ├── index.js                  (Puerto 3006)
+│   │   ├── package.json
+│   │   └── package-lock.json
 │   ├── roulette/
-│   │   ├── index.js
-│   │   └── package.json
+│   │   ├── index.js                  (Puerto 3002)
+│   │   ├── package.json
+│   │   └── package-lock.json
 │   ├── statistics/
-│   │   ├── index.js
-│   │   └── package.json
+│   │   ├── index.js                  (Puerto 3005)
+│   │   ├── package.json
+│   │   └── package-lock.json
 │   ├── transactions/
-│   │   ├── index.js
-│   │   └── package.json
+│   │   ├── index.js                  (Puerto 3004)
+│   │   ├── package.json
+│   │   └── package-lock.json
 │   └── users/
-│       ├── index.js
-│       └── package.json
+│       ├── index.js                  (Puerto 3001)
+│       ├── package.json
+│       └── package-lock.json
 │
-├── BD postgres/
-│   ├── BDonificaciones.sql
+├── BD postgres/                      ← Scripts SQL para bases de datos
+│   ├── BDbonificaciones.sql
 │   ├── BDestadisticas.sql
 │   ├── BDeventos.sql
 │   ├── BDroulette.sql
 │   └── BDusers.sql
 │
-├── README.md
-└── Roulette_Microservices.postman_collection.json
-
-Cada carpeta contiene su propio código y dependencias (usando Node.js + Express). Además, se incluye una colección de Postman para facilitar las pruebas de cada endpoint. 📋
+├── postman/                          ← Colección de Postman para probar las APIs
+│   └── Roulette_Microservices.postman_collection.json
+│
+├── roulette-frontend/                ← Frontend del proyecto (React)
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README.md
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   ├── logo192.png
+│   │   ├── logo512.png
+│   │   ├── manifest.json
+│   │   └── robots.txt
+│   └── src/
+│       ├── App.css
+│       ├── App.js                  ← Configuración de rutas con React Router
+│       ├── App.test.js
+│       ├── index.css
+│       ├── index.js                ← Punto de entrada del frontend
+│       ├── logo.svg
+│       ├── reportWebVitals.js
+│       ├── setupTests.js
+│       ├── components/             ← Componentes reutilizables
+│       │   └── ExampleComponent.js ← Ejemplo de consumo de API (Users)
+│       ├── pages/                  ← Páginas principales
+│       │   ├── Home.js
+│       │   ├── Login.js
+│       │   ├── Dashboard.js
+│       │   ├── RouletteGame.js
+│       │   └── Stats.js
+│       └── services/               ← Configuración de APIs para cada microservicio
+│           ├── usersApi.js         (Puerto 3001)
+│           ├── rouletteApi.js      (Puerto 3002)
+│           ├── bonusesApi.js       (Puerto 3003)
+│           ├── transactionsApi.js  (Puerto 3004)
+│           ├── statisticsApi.js    (Puerto 3005)
+│           └── eventsApi.js        (Puerto 3006)
+│
+└── README.md                         ← Este archivo de documentación
+```
 
 ---
 
-🚀 Cómo Poner en Marcha el Proyecto
-🧰 Requisitos Previos
-Node.js instalado 💻
-PostgreSQL instalado y corriendo (recomendado v13+) 🐘
-pgAdmin (opcional, para cargar las bases de datos de forma visual)
-Git para clonar el repositorio 🐙
-Postman para probar las APIs 📲
+## 🚀 Cómo Poner en Marcha el Proyecto
 
-### Pasos de Instalación y Ejecución
+### 🧰 Requisitos Previos
 
-1. **Clonar el Repositorio:**
+- **Node.js** instalado.
+- **PostgreSQL** instalado y corriendo (recomendado v13+).
+- **pgAdmin** (opcional, para gestionar bases de datos).
+- **Git** para clonar el repositorio.
+- **Postman** para probar las APIs.
 
-   ```bash
-   git clone https://github.com/caesar-dat-com/Roulette.git
-   ```
+### 1. Clonar el Repositorio
 
-2. **Desde cada base, abre la opción "Query Tool" y ejecuta el archivo .sql correspondiente, que se encuentra en la carpeta BD postgres/.**
+```bash
+git clone https://github.com/caesar-dat-com/Roulette.git
+```
 
-- Opción B - vía terminal de PostgreSQL:
+### 2. Configurar las Bases de Datos
 
+Desde cada base, abra la opción "Query Tool" en pgAdmin y ejecute el archivo SQL correspondiente (ubicados en la carpeta `BD postgres/`):
+
+- BDusers.sql
+- BDroulette.sql
+- BDbonificaciones.sql
+- BDestadisticas.sql
+- BDeventos.sql
+
+**Opción B: vía terminal de PostgreSQL**
+
+```bash
 psql -U postgres -d Users -f "BD postgres/BDusers.sql"
 psql -U postgres -d Roulette -f "BD postgres/BDroulette.sql"
 psql -U postgres -d Bonificaciones -f "BD postgres/BDbonificaciones.sql"
 psql -U postgres -d Estadisticas -f "BD postgres/BDestadisticas.sql"
 psql -U postgres -d Eventos -f "BD postgres/BDeventos.sql"
+```
 
-3. Configurar la Conexión a la Base de Datos
-Dentro de cada carpeta de microservicio, cree un archivo .env con su configuración PostgreSQL:
+### 3. Configurar la Conexión a la Base de Datos en Cada Microservicio
 
+Dentro de cada carpeta de microservicio (por ejemplo, `Services/users`), cree un archivo `.env` con la siguiente configuración (ajuste los valores según corresponda):
+
+```
 PG_HOST=localhost
 PG_PORT=5432
 PG_USER=postgres
 PG_PASSWORD=tu_contraseña
 PG_DATABASE=NombreBaseDeDatosCorrespondiente
+```
 
-4. **Instalar Dependencias en Cada Microservicio:**
+### 4. Instalar Dependencias y Ejecutar los Microservicios
 
-   Por cada carpeta de microservicio (por ejemplo, `Services/users`):
+Para cada microservicio (ubicados en `Roulette/Services/`):
 
+1. Navegue a la carpeta del microservicio:
    ```bash
-   cd Services/users
+   cd Roulette/Services/users
+   ```
+2. Instale las dependencias:
+   ```bash
    npm install
    ```
-
-   Repite el proceso para: `roulette`, `bonuses`, `transactions`, `statistics` y `events`.
-
-5. **Ejecutar Cada Microservicio:**
-
-   Abre una terminal separada para cada servicio y ejecuta:
-
+3. Inicie el microservicio:
    ```bash
    node index.js
    ```
+   *(O use `npm start` si está configurado en `package.json`)*
 
-   Verifica en cada terminal que aparezcan mensajes como:
-   - **"Users microservice running on port 3001"**
-   - **"Roulette microservice running on port 3002"**
-   - **"Transactions microservice running on port 3004"**, etc. ✅
+Repita el proceso para los microservicios:
+- **users** (Puerto 3001)
+- **roulette** (Puerto 3002)
+- **bonuses** (Puerto 3003)
+- **transactions** (Puerto 3004)
+- **statistics** (Puerto 3005)
+- **events** (Puerto 3006)
 
-6. **Importar la Colección de Postman:**
+Verifique que cada microservicio muestre mensajes indicando que está corriendo en su puerto correspondiente.
 
-   - Abre Postman.
-   - Haz clic en **"Import"** y selecciona el archivo `Roulette_Microservices.postman_collection.json`.
-   - Verifica que aparezcan las carpetas correspondientes a cada microservicio (Users, Roulette, Bonuses, Transactions, Statistics, Events).
+### 5. Iniciar el Frontend
 
-7. **Probar los Endpoints:**
+El frontend se encuentra en la carpeta `Roulette/roulette-frontend`.
 
-   - Selecciona cada solicitud en Postman y haz clic en **"Send"** para probar los endpoints.  
-   - Por ejemplo, para **crear un usuario**, usa la solicitud "Create User" con el Body adecuado y revisa la respuesta.
-   - Repite el proceso para todos los microservicios.
+1. Navegue a la carpeta del frontend:
+   ```bash
+   cd Roulette/roulette-frontend
+   ```
+2. Instale las dependencias:
+   ```bash
+   npm install
+   ```
+3. Inicie el servidor de desarrollo:
+   ```bash
+   npm start
+   ```
+   Esto abrirá la aplicación en `http://localhost:3000`.
+
+### 6. Importar la Colección de Postman
+
+- Abra Postman.
+- Haga clic en **"Import"** y seleccione el archivo `Roulette_Microservices.postman_collection.json` (ubicado en la carpeta `postman/`).
+- Verifique que aparezcan las carpetas correspondientes a cada microservicio (Users, Roulette, Bonuses, Transactions, Statistics, Events).
+
+### 7. Probar los Endpoints
+
+Utilice Postman para enviar peticiones a cada microservicio y verificar que las respuestas sean las esperadas. Por ejemplo, para crear un usuario, utilice la solicitud `POST /usuarios` con el cuerpo adecuado.
 
 ---
 
 ## 🔮 Futuras Mejoras
 
 - **Integración entre microservicios:**  
-  Conectar los servicios (por ejemplo, que Roulette valide el usuario mediante el microservicio de Users) para un flujo completo.
+  Conectar servicios (por ejemplo, que Roulette valide el usuario mediante el microservicio de Users) para lograr un flujo completo.
 - **Persistencia de Datos:**  
-  Integrar una base de datos para almacenar usuarios, transacciones y demás datos de forma persistente.
+  Integrar una base de datos robusta para almacenar usuarios, transacciones y otros datos.
 - **API Gateway:**  
   Desarrollar un API Gateway para centralizar y proteger las peticiones.
 - **Autenticación y Seguridad:**  
-  Mejorar la seguridad con autenticación y autorización avanzada.
+  Mejorar la seguridad con autenticación y autorización avanzada (por ejemplo, JWT).
 - **Monitorización y Logging:**  
-  Agregar herramientas para monitorear el rendimiento y los logs de cada microservicio.
+  Agregar herramientas para monitorear el rendimiento y registrar logs de cada microservicio.
 
+---
+
+## Conclusión
+
+Este proyecto demuestra una arquitectura basada en microservicios para un casino virtual de ruleta, donde:
+- Cada microservicio (Users, Roulette, Bonuses, Transactions, Statistics, Events) se ejecuta de forma independiente en su puerto asignado.
+- El frontend, desarrollado en React, se conecta a estos microservicios a través de Axios.
+- Se han proporcionado scripts SQL y una colección de Postman para facilitar las pruebas.
+
+Siga los pasos anteriores para instalar y ejecutar el proyecto, y disfrute de su **Roulette Virtual Casino Microservices**.
+
+---
+
+¡Happy hacking!
