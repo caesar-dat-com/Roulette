@@ -6,6 +6,7 @@ Orquesta el lanzamiento de los microservicios y frontend de "Roulette".
 - No reinstala deps de los microservicios (suponemos ya están instaladas).
 - Instala deps del frontend solo si falta react-scripts.
 - Lanza cada uno en su propia ventana de terminal.
+- Abre el navegador apuntando a la pantalla de login al arrancar el frontend.
 """
 import os
 import subprocess
@@ -13,6 +14,7 @@ import platform
 import shutil
 import sys
 import time
+import webbrowser
 
 # Detectar sistema operativo
 IS_WINDOWS  = platform.system() == "Windows"
@@ -20,15 +22,16 @@ NODE_CMD    = "node.exe" if IS_WINDOWS else "node"
 NPM_CMD     = "npm.cmd"  if IS_WINDOWS else "npm"
 
 # Rutas base
-BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-SERVICES_DIR= os.path.join(BASE_DIR, "Services")
-FRONTEND_DIR= os.path.join(BASE_DIR, "roulette-frontend")
+BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
+SERVICES_DIR = os.path.join(BASE_DIR, "Services")
+FRONTEND_DIR = os.path.join(BASE_DIR, "roulette-frontend")
 
 # Verificar herramientas disponibles
 def check_tool(cmd):
     if not (shutil.which(cmd) or (os.path.isabs(cmd) and os.path.isfile(cmd))):
         print(f"❌ No se encontró: {cmd}")
         sys.exit(1)
+
 for t in (NODE_CMD, NPM_CMD):
     check_tool(t)
 
@@ -86,6 +89,13 @@ def start_frontend():
 def main():
     service_procs = start_services()
     frontend_proc = start_frontend()
+
+    # Abrir navegador apuntando a la pantalla de login
+    try:
+        webbrowser.open('http://localhost:3000/login')
+    except Exception as e:
+        print(f"No se pudo abrir el navegador automáticamente: {e}")
+
     print("\n🎉 Todos los servicios y el frontend están corriendo en ventanas separadas.")
     try:
         while True:

@@ -1,3 +1,5 @@
+// roulette-frontend/src/pages/Home.js
+
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import * as THREE from 'three';
@@ -8,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     const container = canvasContainer.current;
     
-    // Escena con fondorgb(0, 0, 0)
+    // Escena con fondo rgb(0, 0, 0)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('rgb(0, 0, 0)');
 
@@ -21,7 +23,7 @@ const Home = () => {
     );
     camera.position.z = 1000;
 
-    // Renderizador con clearColor
+    // Renderizador con antialias y clearColor
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setClearColor('rgb(0, 0, 0)', 1);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -42,10 +44,10 @@ const Home = () => {
     for (let ix = 0; ix < AMOUNTX; ix++) {
       for (let iy = 0; iy < AMOUNTY; iy++) {
         // Posiciona cada partícula en una cuadrícula
-        positions[i] = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
+        positions[i]     = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
         positions[i + 1] = 0;
         positions[i + 2] = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
-        scales[j] = 1;
+        scales[j]        = 1;
         i += 3;
         j++;
       }
@@ -59,14 +61,12 @@ const Home = () => {
     // Material con shaders para dibujar puntos como esferas
     const material = new THREE.ShaderMaterial({
       uniforms: {
-        // Color de las esferas: #ff3270 (rojo brillante)
-        color: { value: new THREE.Color(' #ff3270') }
+        color: { value: new THREE.Color('#ff3270') } // Color de las esferas
       },
       vertexShader: `
         attribute float scale;
         void main() {
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          // Aumentamos un poco el tamaño (600.0)
           gl_PointSize = scale * (600.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
@@ -74,7 +74,6 @@ const Home = () => {
       fragmentShader: `
         uniform vec3 color;
         void main() {
-          // Pinta un círculo en cada "point" (simulando una esfera 2D)
           if (length(gl_PointCoord - vec2(0.5, 0.5)) > 0.475) discard;
           gl_FragColor = vec4(color, 1.0);
         }
@@ -151,15 +150,12 @@ const Home = () => {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        // Tipografías
         fontFamily: '"Montserrat", "Lato", sans-serif',
-        // Texto en Cyberpunk SCARLET
         color: '#ff3270',
-        // Ocupa toda la altura
         minHeight: '100vh'
       }}
     >
-      {/* Contenedor para el canvas de Three.js */}
+      {/* Canvas de Three.js */}
       <div
         ref={canvasContainer}
         style={{
@@ -171,6 +167,7 @@ const Home = () => {
           zIndex: -1
         }}
       />
+
       {/* Contenido principal */}
       <div style={{ position: 'relative', zIndex: 1, padding: '2rem' }}>
         <h1>Bienvenido a Roulette Virtual Casino</h1>
@@ -179,6 +176,11 @@ const Home = () => {
             <li>
               <Link to="/login" style={{ color: '#ff3270', textDecoration: 'none' }}>
                 Iniciar Sesión
+              </Link>
+            </li>
+            <li>
+              <Link to="/signup" style={{ color: '#ff3270', textDecoration: 'none' }}>
+                Sign Up
               </Link>
             </li>
             <li>
