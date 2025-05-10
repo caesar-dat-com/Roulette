@@ -38,6 +38,17 @@ Esta ausencia de flexibilidad limita la capacidad de adaptación a nuevos juegos
 - Contar con una arquitectura mantenible, escalable y desacoplada.
 
 ---
+## 🧠 Identificación del Problema
+
+Actualmente, muchas plataformas de simulación de apuestas carecen de estructuras modulares que permitan escalar funcionalidades, medir resultados estadísticos en tiempo real o personalizar eventos y recompensas. Esta ausencia de flexibilidad limita la capacidad de adaptación a nuevos juegos, reglas o segmentos de usuarios.
+
+### 🧩 Necesidades detectadas:
+- Simular un entorno de apuestas seguro y sin dinero real.
+- Gestionar distintos tipos de usuarios con roles específicos.
+- Visualizar estadísticas del sistema para análisis de resultados.
+- Aplicar bonificaciones y eventos promocionales programables.
+- Contar con una arquitectura mantenible, escalable y desacoplada.
+
 
 ## 🛠️ Características Actuales
 
@@ -127,6 +138,54 @@ Esta ausencia de flexibilidad limita la capacidad de adaptación a nuevos juegos
   }
   ```
 
+
+👥 Comportamiento del Sistema por Tipo de Usuario
+El sistema está diseñado para dos tipos de usuarios: Jugador y Administrador.
+Cada uno interactúa con la aplicación de manera diferente, utilizando los microservicios según sus permisos y necesidades.
+
+🧑‍🎲 Usuario: Jugador
+Este es el usuario común que interactúa con la aplicación para divertirse, participar en rondas de ruleta y aprovechar bonificaciones.
+
+🧩 Historias de usuario (Jugador):
+“Como jugador, quiero registrarme para poder acceder a la ruleta virtual y recibir bonificaciones.”
+
+“Como jugador, quiero jugar una partida de ruleta para obtener recompensas.”
+
+“Como jugador, quiero ver mis estadísticas de juego para saber cuántas veces he ganado.”
+
+🧪 Acciones posibles:
+Acción	Microservicio	Endpoint sugerido
+Registrarse	Users	POST /usuarios
+Consultar datos propios	Users	GET /usuarios/:id
+Apostar en la ruleta	Roulette	POST /apostar
+Ver resultados	Roulette	GET /resultados
+Reclamar bonificaciones	Bonificaciones	GET /bonificaciones/:id
+Ver eventos actuales	Eventos	GET /eventos
+Ver estadísticas globales	Estadísticas	GET /estadisticas
+🛡️ Usuario: Administrador
+El administrador es responsable de la gestión del sistema, visualización completa de resultados, creación de eventos y supervisión de usuarios.
+
+🧩 Historias de usuario (Admin):
+“Como administrador, quiero ver todos los usuarios registrados para hacer seguimiento de su actividad.”
+
+“Como administrador, quiero crear eventos promocionales para atraer más jugadores.”
+
+“Como administrador, quiero consultar estadísticas generales para analizar tendencias.”
+
+🧪 Acciones posibles:
+Acción	Microservicio	Endpoint sugerido
+Ver todos los usuarios	Users	GET /usuarios
+Crear/editar eventos	Eventos	POST /eventos
+Crear/editar bonificaciones	Bonificaciones	POST /bonificaciones
+Consultar estadísticas globales	Estadísticas	GET /estadisticas
+🔁 Flujo básico (Jugador)
+🔐 Se registra desde el microservicio Users.
+
+🎲 Realiza apuestas llamando a Roulette.
+
+🎁 Reclama recompensas en Bonificaciones.
+
+📊 Consulta sus avances en Estadísticas.
 ---
 
 ## 👥 Comportamiento del Sistema por Tipo de Usuario
