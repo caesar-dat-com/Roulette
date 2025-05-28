@@ -1,69 +1,50 @@
-// Services/events/index.js
 const express = require('express');
-const app = express();
+const cors = require('cors');
+const { Pool } = require('pg');
 
+const app = express();
+app.use(cors());
 app.use(express.json());
 
-let events = [];
-
-/**
- * GET /events
- * Lista todos los eventos activos.
- */
-app.get('/events', (req, res) => {
-  res.json(events);
+// Conexión a PostgreSQL
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:toor@localhost:5433/usersdb'
 });
 
-/**
- * POST /events
- * Crea un nuevo evento.
- * Recibe: { name, description, startTime, endTime, active }
- */
-app.post('/events', (req, res) => {
-  const { name, description, startTime, endTime, active } = req.body;
-  const event = {
-    id: events.length + 1,
-    name,
-    description,
-    startTime,
-    endTime,
-    active
-  };
-  events.push(event);
-  res.status(201).json(event);
+// Healthcheck
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
-/**
- * PUT /events/:id
- * Actualiza un evento existente.
- */
-app.put('/events/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  let event = events.find(e => e.id === id);
-  if (!event) {
-    return res.status(404).json({ message: 'Event not found' });
+// Obtener todos los eventos
+app.get('/eventos', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM eventos ORDER BY id');
+    res.json(rows);
+  } catch (err) {
+    console.error('GET /eventos error:', err.stack);
+    res.status(500).json({ message: 'Error en la base de datos' });
   }
-  event = { ...event, ...req.body };
-  events = events.map(e => (e.id === id ? event : e));
-  res.json(event);
 });
 
-/**
- * DELETE /events/:id
- * Elimina un evento.
- */
-app.delete('/events/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = events.findIndex(e => e.id === id);
-  if (index === -1) {
-    return res.status(404).json({ message: 'Event not found' });
+// Crear un nuevo evento
+app.post('/eventos', async (req, res) => {
+  const { nombre, descripcion, start_time, end_time, activo } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO eventos (nombre, descripcion, start_time, end_time, activo)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [nombre, descripcion, start_time, end_time, activo]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('POST /eventos error:', err.stack);
+    res.status(500).json({ message: 'Error en la base de datos' });
   }
-  const deletedEvent = events.splice(index, 1);
-  res.json({ message: 'Event deleted', event: deletedEvent[0] });
 });
 
+// Iniciar el servidor
 const PORT = 3006;
 app.listen(PORT, () => {
   console.log(`Events microservice running on port ${PORT}`);
 });
-

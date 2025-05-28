@@ -1,0 +1,36 @@
+global: 
+  scrape_interval: 15s
+
+rule_files:
+  - alert.rules.yml
+
+scrape_configs:
+  - job_name: 'users'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['users:3001']
+
+  - job_name: 'roulette'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['roulette:3002']
+
+  - job_name: 'bonuses'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['bonuses:3003']
+
+  - job_name: 'transactions'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['transactions:3004']
+
+  - job_name: 'statistics'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['statistics:3005']
+
+  - job_name: 'events'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['events:3006']

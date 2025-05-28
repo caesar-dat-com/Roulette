@@ -27,6 +27,12 @@ const Login = () => {
       // 2) Log de la respuesta
       setLog(prev => prev + `\n✅ ${res.status} ${JSON.stringify(res.data)}`);
       setMessage(`Welcome, ${res.data.user.name}!`);
+      sessionStorage.setItem('user', JSON.stringify({
+      id: res.data.user.id || res.data.user.id_usuario, // soporte para ambas formas
+      name: res.data.user.name,
+      alias: res.data.user.alias
+      }));
+
       setLoading(false);
       setTimeout(() => navigate('/dashboard'), 1000);
     } catch (err) {

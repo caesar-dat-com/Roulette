@@ -1,64 +1,47 @@
-// Services/bonuses/index.js
-const express = require('express');
-const app = express();
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
 
+const app = express();
+app.use(cors());
 app.use(express.json());
 
-let bonuses = [];
-
-/**
- * POST /bonuses
- * Crea una nueva bonificación.
- * Recibe: { type, description, effect, conditions }
- */
-app.post('/bonuses', (req, res) => {
-  const { type, description, effect, conditions } = req.body;
-  const bonus = {
-    id: bonuses.length + 1,
-    type,
-    description,
-    effect,
-    conditions
-  };
-  bonuses.push(bonus);
-  res.status(201).json(bonus);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
-/**
- * GET /bonuses
- * Lista todas las bonificaciones.
- */
-app.get('/bonuses', (req, res) => {
-  res.json(bonuses);
+// Ruta de salud
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
 });
 
-/**
- * GET /bonuses/:id
- * Obtiene los detalles de una bonificación específica.
- */
-app.get('/bonuses/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const bonus = bonuses.find(b => b.id === id);
-  if (bonus) res.json(bonus);
-  else res.status(404).json({ message: 'Bonus not found' });
-});
-
-/**
- * PUT /bonuses/:id
- * Actualiza una bonificación.
- */
-app.put('/bonuses/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  let bonus = bonuses.find(b => b.id === id);
-  if (!bonus) {
-    return res.status(404).json({ message: 'Bonus not found' });
+// Obtener todas las bonificaciones
+app.get("/bonificaciones", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM bonificaciones");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET /bonificaciones error:", err.message);
+    res.status(500).json({ message: "Error en la base de datos" });
   }
-  bonus = { ...bonus, ...req.body };
-  bonuses = bonuses.map(b => (b.id === id ? bonus : b));
-  res.json(bonus);
 });
 
-const PORT = 3003;
+// Insertar una nueva bonificación
+app.post("/bonificaciones", async (req, res) => {
+  const { tipo, descripcion, efecto, condiciones } = req.body;
+  try {
+    const result = await pool.query(
+      "INSERT INTO bonificaciones (tipo, descripcion, efecto, condiciones) VALUES ($1, $2, $3, $4) RETURNING *",
+      [tipo, descripcion, efecto, condiciones]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("POST /bonificaciones error:", err.message);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Bonuses microservice running on port ${PORT}`);
 });

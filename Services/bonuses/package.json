@@ -1,16 +1,22 @@
 {
   "name": "bonuses",
   "version": "1.0.0",
+  "description": "Bonuses microservice for Roulette project",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "bonuses"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "bonuses": "file:",
-    "express": "^5.1.0"
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "pg": "^8.11.1"
   }
 }

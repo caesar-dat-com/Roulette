@@ -1,0 +1,169 @@
+version: '3.9'
+
+services:
+
+  postgres-users:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: usersdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - "5433:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+      - ./BD_postgres/:/docker-entrypoint-initdb.d:ro
+    restart: always
+
+  postgres-roulette:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: roulettedb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - "5434:5432"
+    volumes:
+      - roulette_data:/var/lib/postgresql/data
+
+    restart: always
+
+  postgres-events:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: eventsdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - "5435:5432"
+    volumes:
+      - events_data:/var/lib/postgresql/data
+    restart: always
+
+  postgres-bonuses:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: bonusesdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - "5436:5432"
+    volumes:
+      - bonuses_data:/var/lib/postgresql/data
+    restart: always
+
+  postgres-statistics:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: statisticsdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - "5437:5432"  # ✅ puerto corregido
+    volumes:
+      - statistics_data:/var/lib/postgresql/data
+    restart: always
+
+
+  bonuses:
+    build: ./Services/bonuses
+    depends_on:
+      - postgres-bonuses
+    environment:
+      DATABASE_URL: postgres://postgres:toor@postgres-bonuses:5432/bonusesdb
+    ports:
+      - "3003:3003"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3003/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  events:
+    build: ./Services/events
+    depends_on:
+      - postgres-events
+    environment:
+      DATABASE_URL: postgres://postgres:toor@postgres-events:5432/eventsdb
+    ports:
+      - "3006:3006"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3006/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  users:
+    build: ./Services/users
+    depends_on:
+      - postgres-users
+    environment:
+      DATABASE_URL: postgres://postgres:toor@postgres-users:5432/usersdb
+    ports:
+      - "3001:3001"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  roulette:
+    build: ./Services/roulette
+    depends_on:
+      - postgres-roulette
+    environment:
+      DATABASE_URL: postgres://postgres:toor@postgres-roulette:5432/roulettedb
+    ports:
+      - "3002:3002"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  transactions:
+    build: ./Services/transactions
+    ports:
+      - "3004:3004"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3004/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  statistics:
+    build: ./Services/statistics
+    depends_on:
+      - postgres-statistics
+    environment:
+      DATABASE_URL: postgres://postgres:toor@postgres-statistics:5432/statisticsdb
+    ports:
+      - "3005:3005"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3005/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+    ports:
+      - "9090:9090"
+
+volumes:
+  users_data:
+  roulette_data:
+  events_data:
+  bonuses_data:
+  statistics_data:
+

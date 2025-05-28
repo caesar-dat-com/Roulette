@@ -1,15 +1,15 @@
 // Services/transactions/index.js
 const express = require('express');
-const app = express();
+const cors    = require('cors');
+const app     = express();
 
+app.use(cors());
 app.use(express.json());
 
 let transactions = [];
 
 /**
  * POST /transactions
- * Crea una nueva transacción (apuesta o ganancia).
- * Recibe: { userId, amount, type, rouletteId }
  */
 app.post('/transactions', (req, res) => {
   const { userId, amount, type, rouletteId } = req.body;
@@ -27,27 +27,28 @@ app.post('/transactions', (req, res) => {
 
 /**
  * GET /transactions/:id
- * Obtiene una transacción específica.
  */
 app.get('/transactions/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const transaction = transactions.find(t => t.id === id);
-  if (transaction) res.json(transaction);
+  const id = parseInt(req.params.id, 10);
+  const tx = transactions.find(t => t.id === id);
+  if (tx) res.json(tx);
   else res.status(404).json({ message: 'Transaction not found' });
 });
 
 /**
  * GET /transactions
- * Lista las transacciones de un usuario (pasando ?userId=xxx)
  */
 app.get('/transactions', (req, res) => {
   const { userId } = req.query;
-  if (userId) {
-    const userTransactions = transactions.filter(t => t.userId == userId);
-    res.json(userTransactions);
-  } else {
-    res.json(transactions);
-  }
+  if (userId) return res.json(transactions.filter(t => t.userId == userId));
+  res.json(transactions);
+});
+
+/**
+ * GET /health
+ */
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 const PORT = 3004;

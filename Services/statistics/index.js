@@ -1,130 +1,83 @@
-// Services/statistics/index.js
-
 const express = require('express');
-const cors    = require('cors');
+const cors = require('cors');
 const { Pool } = require('pg');
-const app     = express();
 
-// ————————————————————————————————
-// 1) Middlewares
-// ————————————————————————————————
-app.use(cors());            // Permitir CORS desde el frontend
-app.use(express.json());    // Parsear bodies JSON
+const app = express();
+const port = 3005;
 
-// ————————————————————————————————
-// 2) Conexión a PostgreSQL
-// ————————————————————————————————
+// Configuración de conexión
 const pool = new Pool({
-  connectionString: 'postgres://postgres:toor@localhost:5432/postgres'
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:toor@localhost:5436/statisticsdb'
 });
 
-// ————————————————————————————————
-// 3) RUTAS DE ESTADÍSTICAS
-// ————————————————————————————————
+app.use(cors());
+app.use(express.json());
 
-/**
- * GET /statistics
- * Estadísticas globales:
- *  - totalUsers: número de usuarios
- *  - totalGamesPlayed: número total de partidas (en events)
- *  - totalMoneyBet: suma de todas las apuestas (bet_amount)
- *  - totalMoneyWon: suma de todas las ganancias (win_amount)
- */
-app.get('/statistics', async (req, res) => {
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Obtener estadísticas
+app.get('/estadisticas', async (req, res) => {
+  const userId = req.query.user_id;
+
   try {
-    // 1) Contar usuarios
-    const { rows: u } = await pool.query(
-      `SELECT COUNT(*)::int AS totalusers FROM users`
-    );
-    // 2) Contar partidas y suma de apuestas
-    const { rows: g } = await pool.query(
-      `SELECT COUNT(*)::int AS totalgames,
-              COALESCE(SUM(bet_amount),0)::numeric AS totalmoneybet
-       FROM events`
-    );
-    // 3) Suma de ganancias
-    const { rows: w } = await pool.query(
-      `SELECT COALESCE(SUM(win_amount),0)::numeric AS totalmoneywon
-       FROM events`
-    );
+    let result;
 
-    return res.json({
-      totalUsers:       u[0].totalusers,
-      totalGamesPlayed: g[0].totalgames,
-      totalMoneyBet:    parseFloat(g[0].totalmoneybet),
-      totalMoneyWon:    parseFloat(w[0].totalmoneywon)
-    });
-  } catch (err) {
-    console.error('GET /statistics error:', err.stack);
-    return res.status(500).json({ message: 'Error al obtener estadísticas globales' });
+    if (userId) {
+      result = await pool.query(
+        'SELECT * FROM statistics WHERE user_id = $1 ORDER BY round_id DESC',
+        [userId]
+      );
+    } else {
+      result = await pool.query('SELECT * FROM statistics ORDER BY round_id DESC');
+    }
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('GET /estadisticas error:', error.message);
+    res.status(500).json({ message: 'Error al obtener estadísticas' });
   }
 });
 
-/**
- * GET /statistics/:userId
- * Estadísticas por usuario:
- *  - gamesPlayed: número de partidas del usuario
- *  - moneyBet: suma de sus apuestas
- *  - moneyWon: suma de sus ganancias
- */
-app.get('/statistics/:userId', async (req, res) => {
-  const userId = parseInt(req.params.userId, 10);
-  if (isNaN(userId)) {
-    return res.status(400).json({ message: 'User ID inválido' });
+// Insertar una nueva estadística
+app.post('/estadisticas', async (req, res) => {
+  const {
+    user_id,
+    round_id,
+    winning_number,
+    winning_color,
+    is_win,
+    event_aplicado,
+    bonus_aplicado,
+    ganancia
+  } = req.body;
+
+  if (
+    user_id == null || round_id == null || winning_number == null ||
+    !winning_color || is_win == null || ganancia == null
+  ) {
+    return res.status(400).json({ message: 'Faltan datos obligatorios' });
   }
+
   try {
-    const { rows } = await pool.query(
-      `SELECT
-         COUNT(*)::int AS gamesplayed,
-         COALESCE(SUM(bet_amount),0)::numeric AS moneybet,
-         COALESCE(SUM(win_amount),0)::numeric AS moneywon
-       FROM events
-       WHERE user_id = $1`,
-      [userId]
+    const result = await pool.query(
+      `INSERT INTO statistics 
+        (user_id, round_id, winning_number, winning_color, is_win, event_aplicado, bonus_aplicado, ganancia, round_timestamp) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+       RETURNING *`,
+      [user_id, round_id, winning_number, winning_color, is_win, event_aplicado, bonus_aplicado, ganancia]
     );
-    return res.json({
-      userId,
-      gamesPlayed: rows[0].gamesplayed,
-      moneyBet:    parseFloat(rows[0].moneybet),
-      moneyWon:    parseFloat(rows[0].moneywon)
-    });
-  } catch (err) {
-    console.error(`GET /statistics/${userId} error:`, err.stack);
-    return res.status(500).json({ message: 'Error al obtener estadísticas de usuario' });
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('POST /estadisticas error:', error.message);
+    res.status(500).json({ message: 'Error al guardar estadística' });
   }
 });
 
-/**
- * GET /statistics/games
- * Estadísticas agregadas de las partidas:
- *  - totalGames: total de partidas
- *  - averageBet: apuesta promedio por partida
- *  - averageWin: ganancia promedio por partida
- */
-app.get('/statistics/games', async (_req, res) => {
-  try {
-    const { rows } = await pool.query(
-      `SELECT
-         COUNT(*)::int AS totalgames,
-         COALESCE(AVG(bet_amount),0)::numeric AS averagebet,
-         COALESCE(AVG(win_amount),0)::numeric AS averagewin
-       FROM events`
-    );
-    return res.json({
-      totalGames:  rows[0].totalgames,
-      averageBet:  parseFloat(rows[0].averagebet),
-      averageWin:  parseFloat(rows[0].averagewin)
-    });
-  } catch (err) {
-    console.error('GET /statistics/games error:', err.stack);
-    return res.status(500).json({ message: 'Error al obtener estadísticas de partidas' });
-  }
-});
 
-// ————————————————————————————————
-// 4) Arranque del servidor
-// ————————————————————————————————
-const PORT = 3005;
-app.listen(PORT, () => {
-  console.log(`Statistics microservice running on port ${PORT}`);
+// Iniciar servidor
+app.listen(port, () => {
+  console.log(`Statistics microservice running on port ${port}`);
 });

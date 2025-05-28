@@ -1,0 +1,34 @@
+groups:
+  - name: instance-down
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instancia caída: {{ $labels.job }}"
+          description: "El servicio '{{ $labels.job }}' está inalcanzable desde hace más de 1 minuto."
+
+  - name: high-error-rate
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta tasa de errores 5xx en {{ $labels.job }}"
+          description: "El servicio '{{ $labels.job }}' presenta errores 5xx persistentes."
+
+  - name: high-latency
+    rules:
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta latencia en {{ $labels.job }}"
+          description: "El tiempo de respuesta 95 percentil de '{{ $labels.job }}' supera 0.5s."
+
