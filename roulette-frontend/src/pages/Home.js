@@ -1,4 +1,4 @@
-// roulette-frontend/src/pages/Home.js
+// src/pages/Home.js
 
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -9,199 +9,263 @@ const Home = () => {
 
   useEffect(() => {
     const container = canvasContainer.current;
-    
-    // Escena con fondo rgb(0, 0, 0)
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('rgb(0, 0, 0)');
+    scene.background = new THREE.Color(0xffffff);
 
-    // Cámara
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      1,
-      10000
-    );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
     camera.position.z = 1000;
 
-    // Renderizador con antialias y clearColor
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor('rgb(0, 0, 0)', 1);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setClearColor(0xffffff, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    // Parámetros de la cuadrícula de partículas
-    const SEPARATION = 60;
-    const AMOUNTX = 40;
-    const AMOUNTY = 40;
+    const SEPARATION = 60, AMOUNTX = 40, AMOUNTY = 40;
     let count = 0;
-
-    const numParticles = AMOUNTX * AMOUNTY;
-    const positions = new Float32Array(numParticles * 3);
-    const scales = new Float32Array(numParticles);
-
-    let i = 0;
-    let j = 0;
-    for (let ix = 0; ix < AMOUNTX; ix++) {
-      for (let iy = 0; iy < AMOUNTY; iy++) {
-        // Posiciona cada partícula en una cuadrícula
-        positions[i]     = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
-        positions[i + 1] = 0;
-        positions[i + 2] = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
-        scales[j]        = 1;
-        i += 3;
-        j++;
+    const num = AMOUNTX * AMOUNTY;
+    const positions = new Float32Array(num*3), scales = new Float32Array(num);
+    let i=0, j=0;
+    for (let x=0; x<AMOUNTX; x++) {
+      for (let y=0; y<AMOUNTY; y++) {
+        positions[i]   = x*SEPARATION - (AMOUNTX*SEPARATION)/2;
+        positions[i+1] = 0;
+        positions[i+2] = y*SEPARATION - (AMOUNTY*SEPARATION)/2;
+        scales[j]      = 1;
+        i+=3; j++;
       }
     }
 
-    // BufferGeometry y atributos
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geom.setAttribute('scale',    new THREE.BufferAttribute(scales,1));
 
-    // Material con shaders para dibujar puntos como esferas
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        color: { value: new THREE.Color('#ff3270') } // Color de las esferas
-      },
+    const mat = new THREE.ShaderMaterial({
+      uniforms:{ color:{ value:new THREE.Color('#1e90ff') } },
       vertexShader: `
         attribute float scale;
-        void main() {
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = scale * (600.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
+        void main(){
+          vec4 mv = modelViewMatrix * vec4(position,1.0);
+          gl_PointSize = scale*(600./-mv.z);
+          gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
         uniform vec3 color;
-        void main() {
-          if (length(gl_PointCoord - vec2(0.5, 0.5)) > 0.475) discard;
-          gl_FragColor = vec4(color, 1.0);
+        void main(){
+          float d = length(gl_PointCoord-vec2(0.5));
+          if(d>0.5) discard;
+          float alpha = smoothstep(0.5,0.0,d);
+          vec3 col = mix(color,vec3(1.0),1.-alpha);
+          gl_FragColor = vec4(col,alpha);
         }
-      `
+      `,
+      transparent:true
     });
+    const points = new THREE.Points(geom,mat);
+    scene.add(points);
 
-    // Creación de la malla de partículas
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    let mx=0,my=0;
+    const halfX=window.innerWidth/2, halfY=window.innerHeight/2;
+    const onMouse = e=>{ mx=e.clientX-halfX; my=e.clientY-halfY; };
+    document.addEventListener('mousemove', onMouse);
 
-    // Control de movimiento del ratón
-    let mouseX = 0;
-    let mouseY = 0;
-    const halfX = window.innerWidth / 2;
-    const halfY = window.innerHeight / 2;
-
-    const onMouseMove = (event) => {
-      mouseX = event.clientX - halfX;
-      mouseY = event.clientY - halfY;
-    };
-    document.addEventListener('mousemove', onMouseMove, false);
-
-    // Función de animación
-    const animate = () => {
+    const animate = ()=>{
       requestAnimationFrame(animate);
-
-      // Desplaza la cámara en función del ratón
-      camera.position.x += (mouseX - camera.position.x) * 0.05;
-      camera.position.y += (-mouseY - camera.position.y) * 0.05;
+      camera.position.x += (mx-camera.position.x)*0.05;
+      camera.position.y += (-my-camera.position.y)*0.05;
       camera.lookAt(scene.position);
 
-      // Actualiza posiciones y escalas para la animación de "olas"
-      let i = 0;
-      let j = 0;
-      for (let ix = 0; ix < AMOUNTX; ix++) {
-        for (let iy = 0; iy < AMOUNTY; iy++) {
-          positions[i + 1] =
-            Math.sin((ix + count) * 0.3) * 50 +
-            Math.sin((iy + count) * 0.5) * 50;
-          scales[j] =
-            (Math.sin((ix + count) * 0.3) + 1) * 8 +
-            (Math.sin((iy + count) * 0.5) + 1) * 8;
-          i += 3;
-          j++;
-        }
+      let idx=0,k2=0;
+      for(let x=0;x<AMOUNTX;x++) for(let y=0;y<AMOUNTY;y++){
+        positions[idx+1] = Math.sin((x+count)*0.3)*50 + Math.sin((y+count)*0.5)*50;
+        scales[k2]       = (Math.sin((x+count)*0.3)+1)*8 + (Math.sin((y+count)*0.5)+1)*8;
+        idx+=3; k2++;
       }
-      geometry.attributes.position.needsUpdate = true;
-      geometry.attributes.scale.needsUpdate = true;
+      geom.attributes.position.needsUpdate = true;
+      geom.attributes.scale.needsUpdate    = true;
 
-      // Renderiza la escena
-      renderer.render(scene, camera);
+      renderer.render(scene,camera);
       count += 0.1;
     };
     animate();
 
-    // Redimensionar la escena al cambiar el tamaño de la ventana
-    const onWindowResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+    const onResize = ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth,window.innerHeight);
     };
-    window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('resize', onResize);
 
-    // Limpieza al desmontar
-    return () => {
-      window.removeEventListener('resize', onWindowResize, false);
-      document.removeEventListener('mousemove', onMouseMove, false);
+    return ()=>{
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('mousemove', onMouse);
       container.removeChild(renderer.domElement);
     };
   }, []);
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        fontFamily: '"Montserrat", "Lato", sans-serif',
-        color: '#ff3270',
-        minHeight: '100vh'
-      }}
-    >
-      {/* Canvas de Three.js */}
-      <div
-        ref={canvasContainer}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1
-        }}
-      />
+    <>
+      <style>{`
+        :root {
+          --bg: transparent;
+          --panel-bg: rgba(255,255,255,0.6);
+          --text: #242424;
+          --accent: #1e90ff;
+          --radius: 0.5rem;
+          --transition: 0.3s ease;
+          --font: 'Inter', sans-serif;
+          --spacing: 1rem;
+        }
+        @keyframes fadeInUp {
+          from { opacity:0; transform:translateY(20px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes emojiBounce {
+          0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); }
+        }
+        @keyframes textRotateIn {
+          from{ opacity:0; transform:rotateX(-90deg); }
+          to  { opacity:1; transform:rotateX(0); }
+        }
 
-      {/* Contenido principal */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '2rem' }}>
-        <h1>Bienvenido a Roulette Virtual Casino</h1>
-        <nav>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '1rem' }}>
-            <li>
-              <Link to="/login" style={{ color: '#ff3270', textDecoration: 'none' }}>
-                Iniciar Sesión
-              </Link>
-            </li>
-            <li>
-              <Link to="/signup" style={{ color: '#ff3270', textDecoration: 'none' }}>
-                Sign Up
-              </Link>
-            </li>
-            <li>
-              <Link to="/dashboard" style={{ color: '#ff3270', textDecoration: 'none' }}>
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/game" style={{ color: '#ff3270', textDecoration: 'none' }}>
-                Jugar a la Ruleta
-              </Link>
-            </li>
-            <li>
-              <Link to="/stats" style={{ color: '#ff3270', textDecoration: 'none' }}>
-                Ver Estadísticas
-              </Link>
-            </li>
+        body, .home-container {
+          margin:0; padding:0;
+          background: var(--bg);
+          font-family: var(--font);
+          color: var(--text);
+          min-height:100vh;
+          display:flex; flex-direction:column; align-items:center;
+        }
+        .background-canvas {
+          position:fixed; top:0; left:0;
+          width:100%; height:100%; z-index:-1;
+        }
+
+        .home-title {
+          font-size:2.5rem;
+          margin: calc(var(--spacing)*2) 0 var(--spacing);
+          animation: fadeInUp 0.6s var(--transition) both;
+        }
+        .home-title span {
+          display:inline-block;
+          animation: textRotateIn 0.5s ease both;
+        }
+        .home-title .emoji {
+          animation: emojiBounce 1.5s infinite;
+        }
+
+        .dashboard-nav {
+          margin-bottom: calc(var(--spacing)*1.5);
+          animation: fadeInUp 0.8s var(--transition) both;
+        }
+        .nav-list {
+          display:flex; gap:var(--spacing);
+          padding: var(--spacing);
+          background: var(--panel-bg);
+          border-radius:var(--radius);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          backdrop-filter: blur(6px);
+        }
+        .nav-link {
+          display:flex; align-items:center; gap:0.25rem;
+          padding:0.5rem 1rem; border-radius:var(--radius);
+          color: var(--text); font-weight:500;
+          text-decoration:none;
+          transition: background var(--transition), color var(--transition);
+        }
+        .nav-link:hover {
+          background: var(--accent); color:#fff;
+        }
+
+        .cards {
+          display:grid;
+          grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+          gap:var(--spacing);
+          width:100%; max-width:1000px;
+          padding-bottom: calc(var(--spacing)*2);
+          animation: fadeInUp 1.2s var(--transition) both;
+        }
+        .card {
+          background: var(--panel-bg);
+          border-radius:var(--radius);
+          padding:var(--spacing);
+          box-shadow:0 4px 8px rgba(0,0,0,0.1);
+          transition: transform var(--transition), background var(--transition);
+          backdrop-filter: blur(6px);
+        }
+        .card:hover {
+          transform: translateY(-8px);
+          background: rgba(255,255,255,0.9);
+        }
+        .card h3 {
+          margin-top:0;
+          color: var(--accent);
+          display:flex; align-items:center; gap:0.5rem;
+          animation: emojiBounce 2s infinite;
+        }
+        .card p, .card ul {
+          margin:0.5rem 0; font-size:0.9rem;
+        }
+        .card ul { padding-left:1.25rem; }
+      `}</style>
+
+      <div className="home-container">
+        <div ref={canvasContainer} className="background-canvas" />
+
+        <h1 className="home-title">
+          {"🎰Roulette Virtual Casino".split("").map((c,i)=>(
+            <span key={i}>{c}</span>
+          ))}
+        </h1>
+
+        <nav className="dashboard-nav">
+          <ul className="nav-list">
+            <li><Link to="/"          className="nav-link">🏠 Home</Link></li>
+            <li><Link to="/login"     className="nav-link">🔑 Log In</Link></li>
+            <li><Link to="/signup"    className="nav-link">✒️ Sign Up</Link></li>
+            <li><Link to="/dashboard" className="nav-link">📋 Dashboard</Link></li>
+            <li><Link to="/game"      className="nav-link">🎲 Jugar Ruleta</Link></li>
+            <li><Link to="/stats"     className="nav-link">📊 Estadísticas</Link></li>
           </ul>
         </nav>
+
+        <div className="cards">
+          <div className="card">
+            <h3>👀 Overview</h3>
+            <p>Microservicios desacoplados: usuarios, apuestas, bonificaciones, eventos, estadísticas.</p>
+          </div>
+          <div className="card">
+            <h3>🎯 Objetivo</h3>
+            <ul>
+              <li>Arquitectura modular y escalable</li>
+              <li>REST entre servicios</li>
+              <li>React + Three.js + CSS dinámico</li>
+            </ul>
+          </div>
+          <div className="card">
+            <h3>🧠 Problema</h3>
+            <p>Monolitos difíciles de escalar, medir o personalizar sin riesgo.</p>
+          </div>
+          <div className="card">
+            <h3>🧩 Necesidades</h3>
+            <ul>
+              <li>Apuestas sin dinero real</li>
+              <li>Roles Jugador/Admin</li>
+              <li>Métricas en tiempo real</li>
+            </ul>
+          </div>
+          <div className="card">
+            <h3>🛠️ Características</h3>
+            <ul>
+              <li>Usuarios (3001)</li>
+              <li>Ruleta (3002)</li>
+              <li>Bonos (3003), Transacc. (3004)</li>
+              <li>Estadíst. (3005), Eventos (3006)</li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
